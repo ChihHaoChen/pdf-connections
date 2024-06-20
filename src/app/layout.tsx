@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import StyledComponentsRegistry from "@/lib/registry";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -16,7 +17,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <title>{`Hana Pets' talk`}</title>
+        <link rel="icon" href="/favicon.ico" />
+      </head>
+      <body className={inter.className}>
+        <StyledComponentsRegistry>
+          <main>{children}</main>
+        </StyledComponentsRegistry>
+      </body>
     </html>
   );
 }
