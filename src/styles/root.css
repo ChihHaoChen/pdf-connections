@@ -1,0 +1,66 @@
+:root {
+  --color-standard: #fff;
+  --color-standard-border: #c4c4c4;
+  --color-standard-hover: #f3f2f1;
+  --color-primary: #00a17b;
+  --color-primary-text: #fff;
+  --color-primary-light: #bee9df;
+  --color-primary-hover: #008163;
+  --color-warning: #e97500;
+  --color-success: #00a17b;
+  --color-success-text: #fff;
+  --color-success-hover: #008163;
+  --color-secondary: rgba(0, 161, 123, 0.2);
+  --color-quaternary: #d1eef9;
+  --color-quaternary-text: #22a7dc;
+  --color-payment-bg: #f8fbf9;
+  --color-disabled: #c4c4c4;
+  --color-disabled-symbol: #c6cdcb;
+  --color-disabled-text: #fff;
+  --color-border: var(--color-disabled);
+  --color-danger: #dc3545;
+  --color-shadow: rgba(0, 0, 0, 0.15);
+  --color-standard-text: #262626;
+  --color-secondary-text: #595959;
+  --color-tertiary-text: #7d7d7d;
+  --color-table-header-bg: #e8fbef;
+  --color-table-bg: #f8f8f8;
+  --color-ticketing-bg: #f9f9f9;
+  --color-card-disabled: #e6eae9;
+  --color-card-hover: #e2f6ef;
+  --color-card-selected: #82d9c1;
+  --color-card-border: #d1d1d6;
+  --color-mask-bg: rgba(0, 0, 0, 0.6);
+  --color-card-border: rgb(200, 200, 200);
+  --color-card-font: rgb(36, 36, 36);
+  --color-title-border: rgb(0, 160, 208);
+  --color-footer-font: #c6cdcb;
+  --font-size-2xs: 0.625rem; /* 10px */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-md: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 2rem; /* 32px */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --width-main: 1200px;
+  --width-max: 640px;
+  --width-section-max: 960px;
+  --space-strong-tight: 4px;
+  --space-tight: 8px;
+  --space-medium: 16px;
+  --space-loose: 24px;
+  --z-index-footer: 1000;
+  --z-index-header: 1005;
+  --z-index-sidebar: 1010;
+  --z-index-popper: 1100;
+  --z-index-modal: 1200;
+  --z-index-message: 1300;
+  --radius-info-title: 0.25rem;
+  --radius-card: 1.5rem;
+  --border-radius-medium: 4px;
+}
