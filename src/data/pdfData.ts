@@ -7,6 +7,7 @@ export const pdfData = {
   edges: [
     { id: 1, source: 1, target: 2, value: "related" },
     { id: 2, source: 2, target: 3, value: "cites" },
+    { id: 3, source: 1, target: 3, value: "" },
   ],
 };
 

@@ -1,8 +1,9 @@
 "use client";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
-import { ThreeScene, Table } from "@/components";
+import { ThreeScene, Table, Header, Loading } from "@/components";
 import { pdfData, DataEdge } from "@/data/pdfData";
+import { EmptyIcon } from "@/assets/icons";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -65,7 +66,7 @@ export default function Home() {
 
   return (
     <StyledLayout className={styles.description}>
-      <StyledHeader>{"PDF Connections"}</StyledHeader>
+      <Header title={"PDF Graph Viewer"} />
       <StyledSection>
         <ThreeScene
           pdfNodes={pdfData.nodes}
@@ -74,7 +75,14 @@ export default function Home() {
         />
       </StyledSection>
       <StyledSection>
-        {edge && <Table columns={columns} dataSource={dataSource} />}
+        <h1 className="sectionTitle">{"Edges for Editing"}</h1>
+        {edge ? (
+          <Table columns={columns} dataSource={dataSource} />
+        ) : (
+          <StyledEmptyIcon>
+            <EmptyIcon className="icon" />
+          </StyledEmptyIcon>
+        )}
       </StyledSection>
     </StyledLayout>
   );
@@ -85,30 +93,26 @@ const StyledLayout = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  width: 100vw;
-  height: 100StyledLayout;
-`;
-
-const StyledHeader = styled.div`
-  display: block;
-  text-align: center;
-  justify-self: center;
-  width: 100vw;
-  height: 80px;
-  color: var(--color-primary);
 `;
 
 const StyledSection = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   padding: 16px;
   max-width: var(--width-main-section);
 
   .input {
     display: none;
+  }
+
+  .sectionTitle {
+    margin: 0 0 16px 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-1);
   }
 `;
 
@@ -125,4 +129,15 @@ const StyledInput = styled.input`
   padding: 0 8px;
   color: var(--color-text-1);
   font-size: var(--font-size-lg);
+`;
+
+const StyledEmptyIcon = styled.div`
+  display: grid;
+  place-items: center;
+  margin: 32px 0;
+  width: 100%;
+
+  .icon {
+    width: 128px;
+  }
 `;
