@@ -35,6 +35,7 @@ export default function Home() {
       setEdgeValue(edge.value);
     } else {
       setEdge(undefined);
+      setEdgeValue("");
     }
   }, []);
 
