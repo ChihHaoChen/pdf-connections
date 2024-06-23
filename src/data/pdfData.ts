@@ -10,7 +10,7 @@ export const pdfData = {
   ],
 };
 
-export type Node = {
+export type DataNode = {
   id: number;
   name: string;
   path: string;
