@@ -168,7 +168,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
   return (
     <>
       <StyledCanvas ref={mountRef} />
-      <StyledLoading visibility={loading ? "visible" : "hidden"}>
+      <StyledLoading display={loading ? "content" : "none"}>
         <Loading />
       </StyledLoading>
     </>
@@ -184,7 +184,7 @@ const StyledCanvas = styled.div`
   overflow: hidden;
 `;
 
-const StyledLoading = styled.div<{ visibility: string }>`
+const StyledLoading = styled.div<{ display: string }>`
   position: absolute;
   left: 0;
   top: 0;
@@ -195,5 +195,5 @@ const StyledLoading = styled.div<{ visibility: string }>`
   height: 800px;
   border-radius: var(--border-radius-sm);
   overflow: hidden;
-  visibility: ${({ visibility }) => (visibility ? visibility : "hidden")};
+  display: ${({ display }) => (display ? display : "none")};
 `;
