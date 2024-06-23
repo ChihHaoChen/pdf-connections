@@ -1,7 +1,9 @@
 // components/ThreeScene.tsx
-import { FC, useCallback, useEffect, useRef, useMemo } from "react";
+import { FC, useCallback, useEffect, useRef, useMemo, useState } from "react";
 import * as THREE from "three";
+import styled from "styled-components";
 import { DataEdge, DataNode } from "@/data/pdfData";
+import { Loading } from "@/components";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
   Edge,
@@ -26,6 +28,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
   const mountRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
   const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
+  const [loading, setLoading] = useState(true);
 
   const selectEdge = useCallback(
     (
@@ -104,6 +107,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
+
       if (nodes.length && edges.length) {
         updateLabels(labels, nodes, edges);
       }
@@ -151,6 +155,8 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       }
     }
 
+    if (mountRef.current) setLoading(false);
+
     // Clean up on unmount
     return () => {
       mount.removeChild(renderer.domElement);
@@ -159,7 +165,35 @@ const ThreeScene: FC<IThreeSceneProps> = ({
     };
   }, [pdfEdges, pdfNodes, selectEdge]);
 
-  return <div ref={mountRef} style={{ width: "100%", height: "800px" }} />;
+  return (
+    <>
+      <StyledCanvas ref={mountRef} />
+      <StyledLoading visibility={loading ? "visible" : "hidden"}>
+        <Loading />
+      </StyledLoading>
+    </>
+  );
 };
 
 export default ThreeScene;
+
+const StyledCanvas = styled.div`
+  width: 100%;
+  height: 800px;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+`;
+
+const StyledLoading = styled.div<{ visibility: string }>`
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 800px;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  visibility: ${({ visibility }) => (visibility ? visibility : "hidden")};
+`;

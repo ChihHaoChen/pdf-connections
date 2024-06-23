@@ -8,7 +8,7 @@ export type Edge = {
   id: number;
 };
 
-export const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+export const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x008080 });
 
 export function createNode(data: DataNode): THREE.Mesh {
   const geometry = new THREE.SphereGeometry(0.2, 32, 32);
@@ -44,7 +44,10 @@ export function createEdge(
   text: string = "",
   id: number
 ) {
-  const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+  const material = new THREE.LineBasicMaterial({
+    color: 0xff6e1e,
+    linewidth: 2,
+  });
   const points = [];
   points.push(
     new THREE.Vector3(node1.position.x, node1.position.y, node1.position.z)
