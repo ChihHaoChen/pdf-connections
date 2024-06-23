@@ -1,33 +1,51 @@
 // components/ThreeScene.tsx
-import React, { useEffect, useRef } from "react";
+import { FC, useCallback, useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
-import { pdfData, DataEdge } from "@/data/pdfData";
+import { DataEdge, DataNode } from "@/data/pdfData";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
-  createEdge,
+  Edge,
   createLabel,
   createNode,
-  Edge,
-  updateEdgeText,
   updateLabels,
+  nodeMaterial,
+  createEdge,
 } from "@/utils";
 
-interface NodeData {
-  id: number;
-  x: number;
-  y: number;
-  z: number;
+interface IThreeSceneProps {
+  pdfNodes?: DataNode[];
+  pdfEdges?: DataEdge[];
+  updateEdge?: (edge: DataEdge | undefined) => void;
 }
 
-const ThreeScene: React.FC = () => {
+const ThreeScene: FC<IThreeSceneProps> = ({
+  pdfNodes,
+  pdfEdges,
+  updateEdge,
+}) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
   const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
 
+  const selectEdge = useCallback(
+    (
+      edge: THREE.Line<THREE.BufferGeometry, THREE.Material> | undefined,
+      edges?: Edge[]
+    ) => {
+      if (edge && edges?.length && pdfEdges?.length) {
+        const [matchedEdge] = edges.filter((e) => e.line.uuid === edge.uuid);
+        const [selectedEdge] = pdfEdges.filter((e) => e.id === matchedEdge.id);
+        selectedEdge && updateEdge?.(selectedEdge);
+      } else {
+        updateEdge?.(undefined);
+      }
+    },
+    [pdfEdges, updateEdge]
+  );
+
   useEffect(() => {
     const mount = mountRef.current!;
 
-    const nodesData = pdfData.nodes;
     // Set up the scene, camera, and renderer
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
@@ -36,48 +54,59 @@ const ThreeScene: React.FC = () => {
       0.1,
       1000
     );
-    camera.position.z = 5;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     mount.appendChild(renderer.domElement);
 
-    // Load nodes from JSON
+    // Position the camera
+    camera.position.z = 6;
+
+    // Declare nodes and labels
     const nodes: THREE.Mesh[] = [];
     const labels: THREE.Sprite[] = [];
-    const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
-    nodesData.forEach((nodeData: NodeData) => {
-      const node = createNode(nodeData, nodeMaterial, scene);
-      const label = createLabel(nodeData.id, scene);
+    pdfNodes?.forEach((nodeData: DataNode) => {
+      const node = createNode(nodeData);
+      const label = createLabel(nodeData.name);
+      scene.add(node);
+      scene.add(label);
       labels.push(label);
       nodes.push(node);
     });
 
     // Create edges (lines) connecting the nodes
-    const edges: Edge[] = [];
+    const edges: {
+      line: THREE.Line;
+      label: THREE.Sprite;
+      text: string;
+      id: number;
+    }[] = [];
 
     // Connect nodes with edges
-
-    const dataEdges: DataEdge[] = pdfData.edges;
-    dataEdges.forEach((edge) => {
+    pdfEdges?.forEach((edge) => {
       const sourceNode = nodes.find((node) => node.userData.id === edge.source);
       const targetNode = nodes.find((node) => node.userData.id === edge.target);
       if (sourceNode && targetNode) {
-        edges.push(
-          createEdge(sourceNode, targetNode, edge.value, edge.id, scene)
+        const { line, label, text, id } = createEdge(
+          sourceNode,
+          targetNode,
+          edge.value,
+          edge.id
         );
+        scene.add(line);
+        scene.add(label);
+        edges.push({ line, label, text, id });
       }
     });
-
-    // Position the camera
-    camera.position.z = 6;
 
     // Render loop
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
-      updateLabels(labels, nodes, edges);
+      if (nodes.length && edges.length) {
+        updateLabels(labels, nodes, edges);
+      }
     }
     animate();
 
@@ -116,26 +145,10 @@ const ThreeScene: React.FC = () => {
           THREE.BufferGeometry,
           THREE.Material
         >;
-        showInputBox(intersectedEdge);
+        selectEdge(intersectedEdge, edges);
+      } else {
+        selectEdge(undefined, edges);
       }
-    }
-
-    function showInputBox(
-      edge: THREE.Line<THREE.BufferGeometry, THREE.Material>
-    ) {
-      const inputBox = document.getElementById("inputBox") as HTMLInputElement;
-      const [matchedEdge] = edges.filter((e) => e.line.uuid === edge.uuid);
-      const initText = matchedEdge.text;
-
-      inputBox.style.display = "block";
-      inputBox.value = initText;
-      inputBox.focus();
-
-      inputBox.onblur = () => {
-        inputBox.style.display = "none";
-        updateEdgeText(edges, edge, inputBox.value, scene);
-        inputBox.value = "";
-      };
     }
 
     // Clean up on unmount
@@ -144,7 +157,7 @@ const ThreeScene: React.FC = () => {
       scene.remove(...nodes, ...labels);
       nodeMaterial.dispose();
     };
-  }, []);
+  }, [pdfEdges, pdfNodes, selectEdge]);
 
   return <div ref={mountRef} style={{ width: "100%", height: "800px" }} />;
 };
