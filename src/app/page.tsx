@@ -81,6 +81,7 @@ export default function Home() {
         ) : (
           <StyledEmptyIcon>
             <EmptyIcon className="icon" />
+            <p className="msg">{"No edge selected"}</p>
           </StyledEmptyIcon>
         )}
       </StyledSection>
@@ -139,5 +140,10 @@ const StyledEmptyIcon = styled.div`
 
   .icon {
     width: 128px;
+  }
+
+  .msg {
+    color: var(--color-text-3);
+    font-weight: var(--font-weight-medium);
   }
 `;
