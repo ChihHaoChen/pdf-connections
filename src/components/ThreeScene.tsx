@@ -103,11 +103,20 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       }
     });
 
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
+    controls.maxPolarAngle = Math.PI / 2;
+    controls.addEventListener("change", () => {
+      renderer.render(scene, camera); // render whenever the OrbitControls changes
+    });
+
     // Render loop
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
-
+      controls.update();
       if (nodes.length && edges.length) {
         updateLabels(labels, nodes, edges);
       }
@@ -120,11 +129,6 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
       renderer.render(scene, camera);
-    });
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.addEventListener("change", () => {
-      renderer.render(scene, camera); // render whenever the OrbitControls changes
     });
 
     // Handle mouse click
