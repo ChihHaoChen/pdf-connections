@@ -80,7 +80,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
 
     // Create edges (lines) connecting the nodes
     const edges: {
-      line: THREE.Line;
+      line: THREE.LineSegments;
       label: THREE.Sprite;
       text: string;
       id: number;
@@ -138,6 +138,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
       raycasterRef.current.setFromCamera(mouseRef.current, camera);
+      raycasterRef.current.params.Line.threshold = 0.1;
 
       const intersects = raycasterRef.current.intersectObjects(
         edges.map((edge) => edge.line)
@@ -168,9 +169,11 @@ const ThreeScene: FC<IThreeSceneProps> = ({
   return (
     <>
       <StyledCanvas ref={mountRef} />
-      <StyledLoading display={loading ? "content" : "none"}>
-        <Loading />
-      </StyledLoading>
+      {loading && (
+        <StyledLoading>
+          <Loading />
+        </StyledLoading>
+      )}
     </>
   );
 };
@@ -184,7 +187,7 @@ const StyledCanvas = styled.div`
   overflow: hidden;
 `;
 
-const StyledLoading = styled.div<{ display: string }>`
+const StyledLoading = styled.div`
   position: absolute;
   left: 0;
   top: 0;
@@ -195,5 +198,4 @@ const StyledLoading = styled.div<{ display: string }>`
   height: 600px;
   border-radius: var(--border-radius-sm);
   overflow: hidden;
-  display: ${({ display }) => (display ? display : "none")};
 `;
