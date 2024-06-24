@@ -56,7 +56,7 @@ export function createEdge(
     new THREE.Vector3(node2.position.x, node2.position.y, node2.position.z)
   );
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const line = new THREE.Line(geometry, material);
+  const line = new THREE.LineSegments(geometry, material);
 
   const midPoint = new THREE.Vector3(
     (node1.position.x + node2.position.x) / 2,
