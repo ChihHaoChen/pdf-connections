@@ -31,10 +31,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
   const [loading, setLoading] = useState(true);
 
   const selectEdge = useCallback(
-    (
-      edge: THREE.Line<THREE.BufferGeometry, THREE.Material> | undefined,
-      edges?: Edge[]
-    ) => {
+    (edge: THREE.LineSegments | undefined, edges?: Edge[]) => {
       if (edge && edges?.length && pdfEdges?.length) {
         const [matchedEdge] = edges.filter((e) => e.line.uuid === edge.uuid);
         const [selectedEdge] = pdfEdges.filter((e) => e.id === matchedEdge.id);
@@ -150,10 +147,8 @@ const ThreeScene: FC<IThreeSceneProps> = ({
 
       if (intersects.length) {
         const [matchedIntersectedEdge] = intersects;
-        const intersectedEdge = matchedIntersectedEdge.object as THREE.Line<
-          THREE.BufferGeometry,
-          THREE.Material
-        >;
+        const intersectedEdge =
+          matchedIntersectedEdge.object as THREE.LineSegments;
         selectEdge(intersectedEdge, edges);
       } else {
         selectEdge(undefined, edges);
