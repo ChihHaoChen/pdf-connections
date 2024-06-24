@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { ThreeScene, Table, Header, Loading } from "@/components";
 import { pdfData, DataEdge } from "@/data/pdfData";
 import { EmptyIcon } from "@/assets/icons";
-import styles from "./page.module.css";
 
 export default function Home() {
   const [edge, setEdge] = useState<DataEdge | undefined>(undefined);
@@ -66,7 +65,7 @@ export default function Home() {
   const dataSource = [{ ...edge }];
 
   return (
-    <StyledLayout className={styles.description}>
+    <StyledLayout>
       <Header title={"PDF Graph Viewer"} />
       <StyledSection>
         <ThreeScene

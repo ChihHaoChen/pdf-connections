@@ -179,7 +179,7 @@ export default ThreeScene;
 
 const StyledCanvas = styled.div`
   width: 100%;
-  height: 800px;
+  height: 600px;
   border-radius: var(--border-radius-sm);
   overflow: hidden;
 `;
@@ -192,7 +192,7 @@ const StyledLoading = styled.div<{ display: string }>`
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 800px;
+  height: 600px;
   border-radius: var(--border-radius-sm);
   overflow: hidden;
   display: ${({ display }) => (display ? display : "none")};
