@@ -1,8 +1,8 @@
 export const pdfData = {
   nodes: [
-    { id: 1, name: "File1.pdf", path: "/path/to/File1.pdf", x: -2, y: 0, z: 0 },
-    { id: 2, name: "File2.pdf", path: "/path/to/File2.pdf", x: 0, y: 2, z: 0 },
-    { id: 3, name: "File3.pdf", path: "/path/to/File3.pdf", x: 2, y: -2, z: 2 },
+    { id: 1, name: "File1.pdf", path: "/File1.pdf", x: -2, y: 0, z: 0 },
+    { id: 2, name: "File2.pdf", path: "/File2.pdf", x: 0, y: 2, z: 0 },
+    { id: 3, name: "File3.pdf", path: "/File3.pdf", x: 2, y: -2, z: 2 },
   ],
   edges: [
     { id: 1, source: 1, target: 2, value: "related" },
