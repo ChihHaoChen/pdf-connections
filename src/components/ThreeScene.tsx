@@ -97,6 +97,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
     GlobalWorkerOptions.workerSrc = "/pdf.worker.js";
     const nodes: THREE.Mesh[] = [];
     const labels: THREE.Sprite[] = [];
+    const edges: Edge[] = [];
     const scene = new THREE.Scene();
     const mount = mountRef.current!;
     const camera = new THREE.PerspectiveCamera(
@@ -124,15 +125,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       await getPdf(nodeData.path, node, scene);
     });
 
-    // Create edges (lines) connecting the nodes
-    const edges: {
-      line: THREE.LineSegments;
-      label: THREE.Sprite;
-      text: string;
-      id: number;
-    }[] = [];
-
-    // Connect edges with nodes
+    // Connect nodes with edges
     pdfEdges?.forEach((edge) => {
       const sourceNode = nodes.find((node) => node.userData.id === edge.source);
       const targetNode = nodes.find((node) => node.userData.id === edge.target);
@@ -152,7 +145,6 @@ const ThreeScene: FC<IThreeSceneProps> = ({
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
     controls.dampingFactor = 0.25;
-    controls.screenSpacePanning = false;
     controls.maxPolarAngle = Math.PI / 2;
     controls.addEventListener("change", () => {
       renderer.render(scene, camera); // render whenever the OrbitControls changes

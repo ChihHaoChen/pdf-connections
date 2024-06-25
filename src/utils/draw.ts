@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { DataNode } from "@/data/pdfData";
 
 export type Edge = {
-  line: THREE.Line;
+  line: THREE.LineSegments;
   label: THREE.Sprite;
   text: string;
   id: number;
