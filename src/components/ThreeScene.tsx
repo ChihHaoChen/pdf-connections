@@ -2,9 +2,10 @@
 import { FC, useCallback, useEffect, useRef, useMemo, useState } from "react";
 import * as THREE from "three";
 import styled from "styled-components";
-import { DataEdge, DataNode } from "@/data/pdfData";
-import { Loading } from "@/components";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+import { Loading } from "@/components";
+import { DataEdge, DataNode } from "@/data/pdfData";
 import {
   Edge,
   createLabel,
@@ -43,11 +44,61 @@ const ThreeScene: FC<IThreeSceneProps> = ({
     [pdfEdges, updateEdge]
   );
 
-  useEffect(() => {
-    const mount = mountRef.current!;
+  const getPdf = useCallback(
+    async (
+      pdfUrl: string,
+      node: THREE.Mesh<THREE.BufferGeometry>,
+      scene: THREE.Scene
+    ) => {
+      const loadingTask = getDocument(pdfUrl);
 
-    // Set up the scene, camera, and renderer
+      try {
+        const pdf = await loadingTask.promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (!context) {
+          throw new Error("Could not get 2D context");
+        }
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+
+        await page.render(renderContext).promise;
+
+        const texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const geometry = new THREE.PlaneGeometry(
+          viewport.width / 500,
+          viewport.height / 500
+        );
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(
+          node.position.x,
+          node.position.y,
+          node.position.z - 1
+        );
+        scene.add(mesh);
+      } catch (error) {
+        console.error("Error loading PDF", error);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    GlobalWorkerOptions.workerSrc = "/pdf.worker.js";
+    const nodes: THREE.Mesh[] = [];
+    const labels: THREE.Sprite[] = [];
     const scene = new THREE.Scene();
+    const mount = mountRef.current!;
     const camera = new THREE.PerspectiveCamera(
       75,
       mount.clientWidth / mount.clientHeight,
@@ -62,17 +113,15 @@ const ThreeScene: FC<IThreeSceneProps> = ({
     // Position the camera
     camera.position.z = 6;
 
-    // Declare nodes and labels
-    const nodes: THREE.Mesh[] = [];
-    const labels: THREE.Sprite[] = [];
-
-    pdfNodes?.forEach((nodeData: DataNode) => {
+    pdfNodes?.forEach(async (nodeData: DataNode) => {
       const node = createNode(nodeData);
       const label = createLabel(nodeData.name);
+
       scene.add(node);
       scene.add(label);
       labels.push(label);
       nodes.push(node);
+      await getPdf(nodeData.path, node, scene);
     });
 
     // Create edges (lines) connecting the nodes
@@ -83,7 +132,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       id: number;
     }[] = [];
 
-    // Connect nodes with edges
+    // Connect edges with nodes
     pdfEdges?.forEach((edge) => {
       const sourceNode = nodes.find((node) => node.userData.id === edge.source);
       const targetNode = nodes.find((node) => node.userData.id === edge.target);
@@ -163,7 +212,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       scene.remove(...nodes, ...labels);
       nodeMaterial.dispose();
     };
-  }, [pdfEdges, pdfNodes, selectEdge]);
+  }, [getPdf, pdfEdges, pdfNodes, selectEdge]);
 
   return (
     <>
