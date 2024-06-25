@@ -1,5 +1,4 @@
-// components/ThreeScene.tsx
-import { FC, useCallback, useEffect, useRef, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import styled from "styled-components";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -34,9 +33,9 @@ const ThreeScene: FC<IThreeSceneProps> = ({
   const selectEdge = useCallback(
     (edge: THREE.LineSegments | undefined, edges?: Edge[]) => {
       if (edge && edges?.length && pdfEdges?.length) {
-        const [matchedEdge] = edges.filter((e) => e.line.uuid === edge.uuid);
-        const [selectedEdge] = pdfEdges.filter((e) => e.id === matchedEdge.id);
-        selectedEdge && updateEdge?.(selectedEdge);
+        const matchedEdge = edges.find((e) => e.line.uuid === edge.uuid);
+        const selectedEdge = pdfEdges.find((e) => e.id === matchedEdge?.id);
+        updateEdge?.(selectedEdge);
       } else {
         updateEdge?.(undefined);
       }
@@ -58,9 +57,8 @@ const ThreeScene: FC<IThreeSceneProps> = ({
         const viewport = page.getViewport({ scale: 1.5 });
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
-        if (!context) {
-          throw new Error("Could not get 2D context");
-        }
+        if (!context) throw new Error("Could not get 2D context");
+
         canvas.width = viewport.width;
         canvas.height = viewport.height;
 
@@ -111,7 +109,6 @@ const ThreeScene: FC<IThreeSceneProps> = ({
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     mount.appendChild(renderer.domElement);
 
-    // Position the camera
     camera.position.z = 6;
 
     pdfNodes?.forEach(async (nodeData: DataNode) => {
@@ -125,7 +122,6 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       await getPdf(nodeData.path, node, scene);
     });
 
-    // Connect nodes with edges
     pdfEdges?.forEach((edge) => {
       const sourceNode = nodes.find((node) => node.userData.id === edge.source);
       const targetNode = nodes.find((node) => node.userData.id === edge.target);
@@ -143,34 +139,31 @@ const ThreeScene: FC<IThreeSceneProps> = ({
     });
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.maxPolarAngle = Math.PI / 2;
     controls.addEventListener("change", () => {
-      renderer.render(scene, camera); // render whenever the OrbitControls changes
+      renderer.render(scene, camera);
     });
 
-    // Render loop
     function animate() {
       requestAnimationFrame(animate);
-      renderer.render(scene, camera);
       controls.update();
+      renderer.render(scene, camera);
       if (nodes.length && edges.length) {
         updateLabels(labels, nodes, edges);
       }
     }
     animate();
 
-    // Handle window resize
-    mount.addEventListener("resize", () => {
+    const handleResize = () => {
       camera.aspect = mount.clientWidth / mount.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
-      renderer.render(scene, camera);
-    });
+    };
 
-    // Handle mouse click
-    mount.addEventListener("click", onClick, false);
+    window.addEventListener("resize", handleResize);
+    mount.addEventListener("click", onClick);
 
     function onClick(event: MouseEvent) {
       event.preventDefault();
@@ -187,9 +180,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       );
 
       if (intersects.length) {
-        const [matchedIntersectedEdge] = intersects;
-        const intersectedEdge =
-          matchedIntersectedEdge.object as THREE.LineSegments;
+        const intersectedEdge = intersects[0].object as THREE.LineSegments;
         selectEdge(intersectedEdge, edges);
       } else {
         selectEdge(undefined, edges);
@@ -198,27 +189,36 @@ const ThreeScene: FC<IThreeSceneProps> = ({
 
     if (mountRef.current) setLoading(false);
 
-    // Clean up on unmount
     return () => {
+      window.removeEventListener("resize", handleResize);
+      mount.removeEventListener("click", onClick);
       mount.removeChild(renderer.domElement);
       scene.remove(...nodes, ...labels);
+      edges.forEach((edge) => {
+        scene.remove(edge.line, edge.label);
+      });
       nodeMaterial.dispose();
     };
   }, [getPdf, pdfEdges, pdfNodes, selectEdge]);
 
   return (
-    <>
+    <StyledWrapper>
       <StyledCanvas ref={mountRef} />
       {loading && (
         <StyledLoading>
           <Loading />
         </StyledLoading>
       )}
-    </>
+    </StyledWrapper>
   );
 };
 
 export default ThreeScene;
+
+const StyledWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
 
 const StyledCanvas = styled.div`
   width: 100%;
@@ -231,6 +231,7 @@ const StyledLoading = styled.div`
   position: absolute;
   left: 0;
   top: 0;
+  bottom: 0;
   display: flex;
   justify-content: center;
   align-items: center;
