@@ -28,7 +28,7 @@ export function createLabel(text: number | string): THREE.Sprite {
     throw new Error("Could not get 2D context");
   }
   context.font = "48px Arial";
-  context.fillStyle = "#FFA500";
+  context.fillStyle = "#FFA200";
   context.fillText(text.toString(), 0, 48);
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -39,8 +39,8 @@ export function createLabel(text: number | string): THREE.Sprite {
 }
 
 export function createEdge(
-  node1: THREE.Mesh,
-  node2: THREE.Mesh,
+  nodeSource: THREE.Mesh,
+  nodeTarget: THREE.Mesh,
   text: string = "",
   id: number
 ) {
@@ -50,18 +50,26 @@ export function createEdge(
   });
   const points = [];
   points.push(
-    new THREE.Vector3(node1.position.x, node1.position.y, node1.position.z)
+    new THREE.Vector3(
+      nodeSource.position.x,
+      nodeSource.position.y,
+      nodeSource.position.z
+    )
   );
   points.push(
-    new THREE.Vector3(node2.position.x, node2.position.y, node2.position.z)
+    new THREE.Vector3(
+      nodeTarget.position.x,
+      nodeTarget.position.y,
+      nodeTarget.position.z
+    )
   );
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
   const line = new THREE.LineSegments(geometry, material);
 
   const midPoint = new THREE.Vector3(
-    (node1.position.x + node2.position.x) / 2,
-    (node1.position.y + node2.position.y) / 2,
-    (node1.position.z + node2.position.z) / 2
+    (nodeSource.position.x + nodeTarget.position.x) / 2,
+    (nodeSource.position.y + nodeTarget.position.y) / 2,
+    (nodeSource.position.z + nodeTarget.position.z) / 2
   );
   const label = createLabel(text);
   label.position.set(midPoint.x, midPoint.y, midPoint.z);

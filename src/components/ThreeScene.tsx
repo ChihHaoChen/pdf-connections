@@ -195,7 +195,9 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       );
 
       if (intersects.length) {
-        const intersectedEdge = intersects[0].object as THREE.LineSegments;
+        const [firstIntersectedEdge] = intersects;
+        const intersectedEdge =
+          firstIntersectedEdge.object as THREE.LineSegments;
         selectEdge(intersectedEdge, edges);
       } else {
         selectEdge(undefined, edges);
