@@ -8,12 +8,10 @@ This project demonstrates rendering PDF files and their connections using Three.
 Make sure you have Node.js and npm installed. 
 Since this project is based on Next.js 14, so please download it (higher than v21) from [nodejs.org](https://nodejs.org/en/download/package-manager) based on your OS.
 
-### Installation
+### Installation and Running the Development Server
 
 Clone the repository and install the dependencies:
 
-
-First, run the development server:
 ```
 git clone https://github.com/ChihHaoChen/pdf-connections
 cd your-project
@@ -21,6 +19,7 @@ npm install
 # or
 pnpm i
 ```
+Start the development server:
 
 ```bash
 npm run dev
@@ -47,8 +46,12 @@ Please refer to the URL [https://pdf-connections.vercel.app](https://pdf-connect
 
 ## Technical Details
 
-1. Frameworks & Libraries: React.js-based Next.js framework is employed for the frontend development with typescript. One advantage of using typescript is to know the available functions or objects in Three.js. Regarding rendering PDF files, the package pdfjs-dist is used to add rendered PDF files close to the nodes. Moreover, since PDF files is an async operation, so a loading indicator gets rendered until PDF files get rendered on canvas. As for styles, styled-components is used.
-2. Data Handling: since creating a DB for this small project is not required, so a sample data has been set up as 
+1. Frameworks & Libraries: 
+- Next.js: Used for frontend development with TypeScript. TypeScript helps identify available functions or objects in Three.js.
+- pdfjs-dist: Used to render PDF files close to the nodes. Since rendering PDF files is an async operation, a loading indicator is shown until the PDFs are rendered on the canvas.
+- styled-components: Used for styling.
+2. Data Handling: 
+- A sample data setup is used instead of creating a database for this small project:
     
     ```
     {
@@ -65,8 +68,11 @@ Please refer to the URL [https://pdf-connections.vercel.app](https://pdf-connect
     };
     ```
     
-    The unique id, file name, and file paths are directly set up in the object format for the nodes and edges for demonstrating the desired features while usually such data uniqueness should be configured in backend.  In this application, since only edges are editable, state variable has been configured in the top view to store the changes after editing edges. No further editing regarding the sample data is employed since that is not required for this application.
+- Unique IDs, file names, and file paths are set up in the object format for nodes and edges to demonstrate desired features. Usually, such data uniqueness should be configured in the backend. Only edges are editable, and state variables are used to store changes after editing edges. No further editing of the sample data is employed since it is not required for this application.
     
-3. Editing edges: an onClick function with  the function intersectObjects from Three.Raycaster is implemented. Since only editing one edge per operation, only the first intersected edge is configured as the argument for the useCallback hook - selectEdge for updating  and saving the value of the selected edge. An table with a input box has been placed under the canvas view. When edges are selected, the table will be rendered, while in the case of no selected edges, an empty icon with message will show up to inform users about no selected edges. Please notice as mentioned beforehand, here saving operation only involves updating the values in the state variable without editing the sample data.
-4. 3D interaction: a class inside the Three addons folder has been used to handle rotation, zoom, and pan operations on canvas for navigating the graph.
+3. Editing edges: 
+- An onClick function with the function intersectObjects from Three.Raycaster is implemented. Since only one edge is edited per operation, only the first intersected edge is passed as the argument to the useCallback hook - selectEdge for updating and saving the selected edge's value.
+- A table with an input box is placed under the canvas view. When edges are selected, the table is rendered; if no edges are selected, an empty icon with a message informs users about no selected edges. The saving operation only involves updating values in the state variable without editing the sample data.
+4. 3D interaction: 
+- A class from the Three.js addons folder handles rotation, zoom, and pan operations on the canvas for navigating the graph.
 
