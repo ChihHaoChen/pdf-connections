@@ -28,7 +28,7 @@ export function createLabel(text: number | string): THREE.Sprite {
     throw new Error("Could not get 2D context");
   }
   context.font = "48px Arial";
-  context.fillStyle = "rgba(255, 255, 255, 1)";
+  context.fillStyle = "#FFA500";
   context.fillText(text.toString(), 0, 48);
 
   const texture = new THREE.CanvasTexture(canvas);

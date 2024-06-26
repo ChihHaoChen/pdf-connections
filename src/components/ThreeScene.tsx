@@ -111,32 +111,50 @@ const ThreeScene: FC<IThreeSceneProps> = ({
 
     camera.position.z = 6;
 
-    pdfNodes?.forEach(async (nodeData: DataNode) => {
-      const node = createNode(nodeData);
-      const label = createLabel(nodeData.name);
-
-      scene.add(node);
-      scene.add(label);
-      labels.push(label);
-      nodes.push(node);
-      await getPdf(nodeData.path, node, scene);
-    });
-
-    pdfEdges?.forEach((edge) => {
-      const sourceNode = nodes.find((node) => node.userData.id === edge.source);
-      const targetNode = nodes.find((node) => node.userData.id === edge.target);
-      if (sourceNode && targetNode) {
-        const { line, label, text, id } = createEdge(
-          sourceNode,
-          targetNode,
-          edge.value,
-          edge.id
+    const loadNodes = async () => {
+      try {
+        const nodePromises = (pdfNodes || []).map(
+          async (nodeData: DataNode) => {
+            const node = createNode(nodeData);
+            const label = createLabel(nodeData.name);
+            scene.add(node);
+            scene.add(label);
+            labels.push(label);
+            nodes.push(node);
+            return getPdf(nodeData.path, node, scene);
+          }
         );
-        scene.add(line);
-        scene.add(label);
-        edges.push({ line, label, text, id });
+        await Promise.all(nodePromises);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    loadNodes();
+
+    const loadEdges = () => {
+      pdfEdges?.forEach((edge) => {
+        const sourceNode = nodes.find(
+          (node) => node.userData.id === edge.source
+        );
+        const targetNode = nodes.find(
+          (node) => node.userData.id === edge.target
+        );
+        if (sourceNode && targetNode) {
+          const { line, label, text, id } = createEdge(
+            sourceNode,
+            targetNode,
+            edge.value,
+            edge.id
+          );
+          scene.add(line);
+          scene.add(label);
+          edges.push({ line, label, text, id });
+        }
+      });
+    };
+
+    loadEdges();
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -146,14 +164,14 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       renderer.render(scene, camera);
     });
 
-    function animate() {
+    const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
       if (nodes.length && edges.length) {
         updateLabels(labels, nodes, edges);
       }
-    }
+    };
     animate();
 
     const handleResize = () => {
@@ -162,10 +180,7 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       renderer.setSize(mount.clientWidth, mount.clientHeight);
     };
 
-    window.addEventListener("resize", handleResize);
-    mount.addEventListener("click", onClick);
-
-    function onClick(event: MouseEvent) {
+    const onClick = (event: MouseEvent) => {
       event.preventDefault();
 
       const rect = mount.getBoundingClientRect();
@@ -185,9 +200,10 @@ const ThreeScene: FC<IThreeSceneProps> = ({
       } else {
         selectEdge(undefined, edges);
       }
-    }
+    };
 
-    if (mountRef.current) setLoading(false);
+    window.addEventListener("resize", handleResize);
+    mount.addEventListener("click", onClick);
 
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -203,7 +219,10 @@ const ThreeScene: FC<IThreeSceneProps> = ({
 
   return (
     <StyledWrapper>
-      <StyledCanvas ref={mountRef} />
+      <StyledCanvas
+        ref={mountRef}
+        visibility={loading ? "hidden" : "visible"}
+      />
       {loading && (
         <StyledLoading>
           <Loading />
@@ -220,18 +239,18 @@ const StyledWrapper = styled.div`
   width: 100%;
 `;
 
-const StyledCanvas = styled.div`
+const StyledCanvas = styled.div<{ visibility: string }>`
   width: 100%;
   height: 600px;
   border-radius: var(--border-radius-sm);
   overflow: hidden;
+  visibility: ${({ visibility }) => (visibility ? visibility : "visible")};
 `;
 
 const StyledLoading = styled.div`
   position: absolute;
   left: 0;
   top: 0;
-  bottom: 0;
   display: flex;
   justify-content: center;
   align-items: center;
