@@ -1,95 +1,149 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import { useCallback, useState } from "react";
+import styled from "styled-components";
+import { ThreeScene, Table, Header, Loading } from "@/components";
+import { pdfData, DataEdge } from "@/data/pdfData";
+import { EmptyIcon } from "@/assets/icons";
 
 export default function Home() {
+  const [edge, setEdge] = useState<DataEdge | undefined>(undefined);
+  const [edgeValue, setEdgeValue] = useState<string>("");
+  const [edgeState, setEdgeState] = useState<DataEdge[]>(pdfData.edges);
+
+  const onChange = useCallback(
+    ({ target }: React.ChangeEvent<HTMLInputElement>) => {
+      setEdgeValue(target.value);
+    },
+    []
+  );
+
+  const onBlur = useCallback(() => {
+    setEdgeState((prev) => {
+      return prev.map((previousEdge) => {
+        if (previousEdge.id === edge?.id) {
+          return { ...previousEdge, value: edgeValue };
+        }
+        return previousEdge;
+      });
+    });
+  }, [edge?.id, edgeValue]);
+
+  const onChangeEdge = useCallback((edge: DataEdge | undefined) => {
+    if (edge) {
+      setEdge(edge);
+      setEdgeValue(edge.value);
+    } else {
+      setEdge(undefined);
+      setEdgeValue("");
+    }
+  }, []);
+
+  const columns = [
+    {
+      name: "id",
+      label: "Id",
+    },
+    {
+      name: "source",
+      label: "Source",
+    },
+    {
+      name: "target",
+      label: "Target",
+    },
+    {
+      name: "value",
+      label: "Value",
+      renderCell: (_: string) => {
+        return (
+          <StyledInput value={edgeValue} onChange={onChange} onBlur={onBlur} />
+        );
+      },
+    },
+  ];
+
+  const dataSource = [{ ...edge }];
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+    <StyledLayout>
+      <Header title={"PDF Graph Viewer"} />
+      <StyledSection>
+        <ThreeScene
+          pdfNodes={pdfData.nodes}
+          pdfEdges={edgeState}
+          updateEdge={onChangeEdge}
         />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      </StyledSection>
+      <StyledSection>
+        <h1 className="sectionTitle">{"Edges for Editing"}</h1>
+        {edge ? (
+          <Table columns={columns} dataSource={dataSource} />
+        ) : (
+          <StyledEmptyIcon>
+            <EmptyIcon className="icon" />
+            <p className="msg">{"No edge selected"}</p>
+          </StyledEmptyIcon>
+        )}
+      </StyledSection>
+    </StyledLayout>
   );
 }
+
+const StyledLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const StyledSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  padding: 16px;
+  max-width: var(--width-main-section);
+
+  .input {
+    display: none;
+  }
+
+  .sectionTitle {
+    margin: 0 0 16px 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-1);
+  }
+`;
+
+const StyledInput = styled.input`
+  display: flex;
+  width: 100%;
+  height: 40px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-border-1);
+  color: var(--color-text-1);
+  background-color: var(--color-bg-0);
+  cursor: text;
+  text-align: end;
+  padding: 0 8px;
+  color: var(--color-text-1);
+  font-size: var(--font-size-lg);
+`;
+
+const StyledEmptyIcon = styled.div`
+  display: grid;
+  place-items: center;
+  margin: 32px 0;
+  width: 100%;
+
+  .icon {
+    width: 128px;
+  }
+
+  .msg {
+    color: var(--color-text-3);
+    font-weight: var(--font-weight-medium);
+  }
+`;
